@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>mtktrainning | 마케팅 상관관계 퀴즈</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>📊 오늘의 마케팅 퀴즈</h1>
+
+  <section id="scenario-section">
+    <h2>📘 시나리오</h2>
+    <p id="scenario-text">시나리오 로딩 중...</p>
+  </section>
+
+  <section id="correlation-section">
+    <h2>📈 상관계수표</h2>
+    <div id="correlation-table">표 불러오는 중...</div>
+  </section>
+
+  <section id="quiz-section">
+    <h2>🧠 문제</h2>
+    <div id="quiz-container">문제 로딩 중...</div>
+    <button id="submit-btn">정답 제출</button>
+    <div id="result-summary"></div>
+  </section>
+
+  <section id="comments-section">
+    <h2>💬 토론</h2>
+    <textarea id="new-comment" placeholder="댓글을 남겨보세요..." rows="3"></textarea><br/>
+    <button id="post-comment-btn">댓글 등록</button>
+    <div id="comment-list">댓글 로딩 중...</div>
+  </section>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
