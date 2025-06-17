@@ -1,4 +1,4 @@
-body {
+body { 
   font-family: 'Segoe UI', sans-serif;
   background-color: #f4f6fa;
   margin: 0;
@@ -58,19 +58,19 @@ label {
   font-weight: bold;
 }
 
-table {
+.heatmap-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
 }
 
-table th, table td {
+.heatmap-table th, .heatmap-table td {
   border: 1px solid #ccc;
   padding: 0.6rem;
   text-align: center;
 }
 
-table th {
+.heatmap-table th {
   background-color: #f0f4fa;
   font-weight: bold;
 }
@@ -79,6 +79,7 @@ table th {
   color: green;
   font-weight: bold;
 }
+
 .wrong {
   color: red;
   font-weight: bold;
@@ -121,4 +122,34 @@ table th {
   font-size: 0.8rem;
   display: block;
   margin-top: 0.3rem;
+}
+
+/* 토글 버튼 및 데이터 테이블 */
+#data-toggle-btn {
+  margin-top: 1rem;
+  background-color: #666;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#data-toggle-btn:hover {
+  background-color: #4c4c4c;
+}
+
+#raw-data-section {
+  display: none;
+  margin-top: 1rem;
+}
+
+#raw-data-table th {
+  background-color: #f9fbfd;
+  font-weight: bold;
+}
+
+#raw-data-table td {
+  background-color: #ffffff;
 }
