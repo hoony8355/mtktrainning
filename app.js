@@ -38,8 +38,7 @@ async function loadLatestQuizSet() {
   console.log(`[📦문제 로딩] 문서 ID: ${quizId}`);
   renderScenario(quizData.scenario);
   renderCorrelationMatrix(quizData.correlation);
-  renderRawDataTable(quizData.data || []);
-  renderQuiz(quizData.questions);
+  renderQuiz(quizData.questions || []);  // ✅ questions 안전하게 처리
   loadComments(quizId);
 }
 
@@ -92,48 +91,16 @@ function renderCorrelationMatrix(correlationObj) {
   console.log("[🌈 시각적 상관계수표 출력 완료]");
 }
 
-function renderRawDataTable(dataArray) {
-  const btn = document.getElementById("toggle-data-btn");
-  const container = document.getElementById("raw-data-table");
-
-  btn.addEventListener("click", () => {
-    const isVisible = container.style.display === "block";
-    container.style.display = isVisible ? "none" : "block";
-    btn.textContent = isVisible ? "📊 14일치 마케팅 데이터 보기" : "📉 표 닫기";
-  });
-
-  if (!dataArray.length) {
-    container.innerHTML = "<p>데이터가 없습니다.</p>";
-    return;
-  }
-
-  const keys = Object.keys(dataArray[0]);
-  const table = document.createElement("table");
-  table.className = "raw-data-table";
-
-  const thead = document.createElement("thead");
-  const headerRow = document.createElement("tr");
-  headerRow.innerHTML = keys.map(k => `<th>${k}</th>`).join("");
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
-
-  const tbody = document.createElement("tbody");
-  dataArray.forEach(row => {
-    const tr = document.createElement("tr");
-    keys.forEach(k => {
-      tr.innerHTML += `<td>${row[k]}</td>`;
-    });
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(tbody);
-  container.appendChild(table);
-  console.log("[📋 14일치 데이터표 렌더링 완료]");
-}
-
 function renderQuiz(questions) {
   const container = document.getElementById("quiz-container");
   container.innerHTML = "";
+
+  if (!questions.length) {
+    container.innerHTML = "<p>❌ 문제가 없습니다. 관리자에게 문의하세요.</p>";
+    console.warn("[⚠️ 문제 없음]");
+    return;
+  }
+
   correctAnswers = questions.map(q => q.answer);
   explanations = questions.map(q => q.explanation);
 
