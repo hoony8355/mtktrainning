@@ -1,8 +1,8 @@
 // Firebase 모듈 가져오기
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDocs, getDoc, query, orderBy,
-  addDoc, serverTimestamp, updateDoc
+  getFirestore, collection, getDocs, query, orderBy,
+  addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
 // Firebase 설정
@@ -36,7 +36,7 @@ async function loadLatestQuizSet() {
 
   console.log(`[📦문제 로딩] 문서 ID: ${quizId}`);
   renderScenario(quizData.scenario);
-  renderCorrelationTable(quizData.correlation);
+  renderCorrelationMatrix(quizData.correlation);
   renderQuiz(quizData.questions);
   loadComments(quizId);
 }
@@ -46,35 +46,48 @@ function renderScenario(text) {
   console.log("[📘시나리오 출력 완료]");
 }
 
-function renderCorrelationTable(correlationObj) {
-  const table = document.createElement("table");
-  table.border = "1";
-
+function renderCorrelationMatrix(correlationObj) {
   const keys = Object.keys(correlationObj);
-  const size = Math.sqrt(keys.length);
-  const variables = Array.from(new Set(keys.map(k => k.split("-")[0])));
+  const variables = Array.from(new Set(keys.flatMap(k => k.split("-"))));
+  const container = document.getElementById("correlation-table");
+  container.innerHTML = "";
+
+  const table = document.createElement("table");
+  table.className = "heatmap-table";
 
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
-  headerRow.innerHTML = "<th></th>" + variables.map(v => `<th>${v}</th>`).join("");
+  headerRow.innerHTML = `<th></th>` + variables.map(v => `<th>${v}</th>`).join("");
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
   const tbody = document.createElement("tbody");
   for (let i = 0; i < variables.length; i++) {
     const row = document.createElement("tr");
-    row.innerHTML = `<th>${variables[i]}</th>` + variables.map(vj => {
-      const key = `${variables[i]}-${vj}`;
-      const val = correlationObj[key] ?? correlationObj[`${vj}-${variables[i]}`] ?? "-";
-      return `<td>${typeof val === "number" ? val.toFixed(2) : "-"}</td>`;
-    }).join("");
+    row.innerHTML = `<th>${variables[i]}</th>`;
+    for (let j = 0; j < variables.length; j++) {
+      const key1 = `${variables[i]}-${variables[j]}`;
+      const key2 = `${variables[j]}-${variables[i]}`;
+      const val = correlationObj[key1] ?? correlationObj[key2] ?? null;
+
+      const cell = document.createElement("td");
+      if (val !== null) {
+        const value = val.toFixed(2);
+        const color = `hsl(${120 * val}, 60%, 80%)`; // 초록 (1.0) → 노랑 (0.5) → 흰색 (0)
+        cell.style.backgroundColor = color;
+        cell.style.textAlign = "center";
+        cell.textContent = value;
+      } else {
+        cell.textContent = "-";
+      }
+      row.appendChild(cell);
+    }
     tbody.appendChild(row);
   }
 
   table.appendChild(tbody);
-  document.getElementById("correlation-table").innerHTML = "";
-  document.getElementById("correlation-table").appendChild(table);
-  console.log("[📊상관계수표 출력 완료]");
+  container.appendChild(table);
+  console.log("[🌈 시각적 상관계수표 출력 완료]");
 }
 
 function renderQuiz(questions) {
