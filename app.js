@@ -21,7 +21,7 @@ const db = getFirestore(app);
 console.log("[🔥Firebase 연결됨]");
 
 let correctAnswers = [];
-let fullQuestions = [];
+let explanations = [];
 
 async function loadLatestQuizSet() {
   const quizSetsRef = collection(db, "quizSets");
@@ -38,6 +38,7 @@ async function loadLatestQuizSet() {
   console.log(`[📦문제 로딩] 문서 ID: ${quizId}`);
   renderScenario(quizData.scenario);
   renderCorrelationMatrix(quizData.correlation);
+  renderRawDataTable(quizData.data || []);
   renderQuiz(quizData.questions);
   loadComments(quizId);
 }
@@ -74,7 +75,7 @@ function renderCorrelationMatrix(correlationObj) {
       const cell = document.createElement("td");
       if (val !== null) {
         const value = val.toFixed(2);
-        const color = `hsl(${120 * val}, 60%, 80%)`; // 초록 (1.0) → 노랑 (0.5) → 흰색 (0)
+        const color = `hsl(${120 * val}, 60%, 80%)`;
         cell.style.backgroundColor = color;
         cell.style.textAlign = "center";
         cell.textContent = value;
@@ -91,11 +92,50 @@ function renderCorrelationMatrix(correlationObj) {
   console.log("[🌈 시각적 상관계수표 출력 완료]");
 }
 
+function renderRawDataTable(dataArray) {
+  const btn = document.getElementById("toggle-data-btn");
+  const container = document.getElementById("raw-data-table");
+
+  btn.addEventListener("click", () => {
+    const isVisible = container.style.display === "block";
+    container.style.display = isVisible ? "none" : "block";
+    btn.textContent = isVisible ? "📊 14일치 마케팅 데이터 보기" : "📉 표 닫기";
+  });
+
+  if (!dataArray.length) {
+    container.innerHTML = "<p>데이터가 없습니다.</p>";
+    return;
+  }
+
+  const keys = Object.keys(dataArray[0]);
+  const table = document.createElement("table");
+  table.className = "raw-data-table";
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  headerRow.innerHTML = keys.map(k => `<th>${k}</th>`).join("");
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  dataArray.forEach(row => {
+    const tr = document.createElement("tr");
+    keys.forEach(k => {
+      tr.innerHTML += `<td>${row[k]}</td>`;
+    });
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  container.appendChild(table);
+  console.log("[📋 14일치 데이터표 렌더링 완료]");
+}
+
 function renderQuiz(questions) {
   const container = document.getElementById("quiz-container");
   container.innerHTML = "";
   correctAnswers = questions.map(q => q.answer);
-  fullQuestions = questions;
+  explanations = questions.map(q => q.explanation);
 
   questions.forEach((q, index) => {
     const div = document.createElement("div");
@@ -109,7 +149,6 @@ function renderQuiz(questions) {
         </label><br/>
       `;
     });
-    div.innerHTML += `<div class="explanation" id="explanation-${index}"></div>`;
     container.appendChild(div);
   });
 
@@ -126,15 +165,10 @@ function handleSubmitAnswers() {
     const selected = document.querySelector(`input[name="q${i}"]:checked`);
     const isCorrect = selected && parseInt(selected.value) === ans;
     if (isCorrect) score++;
-
-    const expDiv = document.getElementById(`explanation-${i}`);
-    expDiv.innerHTML = `
-      <p>${isCorrect ? "✅ 정답입니다." : `❌ 오답입니다. 정답은 ${ans}번입니다.`}</p>
-      <p><strong>해설:</strong> ${fullQuestions[i].explanation}</p>
-    `;
+    summary.innerHTML += `<p>Q${i + 1}: ${isCorrect ? "✅ 정답" : "❌ 오답"} (정답: ${ans})<br/><em>${explanations[i]}</em></p>`;
   });
 
-  summary.innerHTML = `<h3>총 점수: ${score} / ${correctAnswers.length}</h3>`;
+  summary.innerHTML += `<h3>총 점수: ${score} / ${correctAnswers.length}</h3>`;
   console.log(`[📝정답 제출 결과] 맞은 개수: ${score} / ${correctAnswers.length}`);
 }
 
