@@ -21,6 +21,7 @@ const db = getFirestore(app);
 console.log("[🔥Firebase 연결됨]");
 
 let correctAnswers = [];
+let fullQuestions = [];
 
 async function loadLatestQuizSet() {
   const quizSetsRef = collection(db, "quizSets");
@@ -94,6 +95,7 @@ function renderQuiz(questions) {
   const container = document.getElementById("quiz-container");
   container.innerHTML = "";
   correctAnswers = questions.map(q => q.answer);
+  fullQuestions = questions;
 
   questions.forEach((q, index) => {
     const div = document.createElement("div");
@@ -107,6 +109,7 @@ function renderQuiz(questions) {
         </label><br/>
       `;
     });
+    div.innerHTML += `<div class="explanation" id="explanation-${index}"></div>`;
     container.appendChild(div);
   });
 
@@ -123,10 +126,15 @@ function handleSubmitAnswers() {
     const selected = document.querySelector(`input[name="q${i}"]:checked`);
     const isCorrect = selected && parseInt(selected.value) === ans;
     if (isCorrect) score++;
-    summary.innerHTML += `<p>Q${i + 1}: ${isCorrect ? "✅ 정답" : "❌ 오답"} (정답: ${ans})</p>`;
+
+    const expDiv = document.getElementById(`explanation-${i}`);
+    expDiv.innerHTML = `
+      <p>${isCorrect ? "✅ 정답입니다." : `❌ 오답입니다. 정답은 ${ans}번입니다.`}</p>
+      <p><strong>해설:</strong> ${fullQuestions[i].explanation}</p>
+    `;
   });
 
-  summary.innerHTML += `<h3>총 점수: ${score} / ${correctAnswers.length}</h3>`;
+  summary.innerHTML = `<h3>총 점수: ${score} / ${correctAnswers.length}</h3>`;
   console.log(`[📝정답 제출 결과] 맞은 개수: ${score} / ${correctAnswers.length}`);
 }
 
